@@ -1,6 +1,6 @@
 # 🛠️ ETL Data Pipeline with Apache Airflow (BashOperator)
 
-## 🎩 Project Scenario
+## 📘 Project Scenario
 
 You are a data engineer at a data analytics consulting company. You have been assigned to a project that aims to **de-congest the national highways** by analyzing the road traffic data from different toll plazas. Each highway is operated by a different toll operator with a different IT setup using different file formats.  
 
