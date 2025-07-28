@@ -171,7 +171,11 @@ This project demonstrates how to:
 
 ---
 
+
 ## 👩‍💻 Author
 
 **Hasmik Margaryan**  
 *Data Engineer | Data Science*
+
+----
+IBM Skills Network © IBM Corporation 2021. All rights reserved.
