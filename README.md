@@ -1,93 +1,143 @@
 # 🛠️ ETL Data Pipeline with Apache Airflow (BashOperator)
 
-## 📘 Project Scenario
+## 🎩 Project Scenario
 
-You are a data engineer at a data analytics consulting company. You have been assigned a project to **decongest the national highways** by analyzing the road traffic data from different toll plazas. Each highway is operated by a different toll operator with a different IT setup that uses various file formats.
+You are a data engineer at a data analytics consulting company. You have been assigned to a project that aims to **de-congest the national highways** by analyzing the road traffic data from different toll plazas. Each highway is operated by a different toll operator with a different IT setup using different file formats.  
 
-Your job is to **collect toll data available in multiple formats and consolidate it into a single structured dataset** for analysis.
-
----
-
-## 🎯 Objectives
-
-In this assignment, I developed an **Apache Airflow DAG** that will:
-
-- Extract data from a `.csv` file  
-- Extract data from a `.tsv` file  
-- Extract data from a **fixed-width text** file  
-- Consolidate all extracted data  
-- Transform a specific column (vehicle type) to uppercase  
-- Load the final result into a staging area
+Your job is to **collect data available in multiple formats and consolidate it into a single file** for further processing and analysis.
 
 ---
 
-## 🔧 Tools & Technologies
+## 📝 Objectives
 
-- Apache Airflow  
-- BashOperator  
-- Shell commands: `cut`, `awk`, `paste`, `tr`, `tar`  
-- Linux environment  
-- Python  
+In this project, you will create a **shell script using Bash commands** to:
+
+- Extract data from a CSV file  
+- Extract data from a TSV file  
+- Extract data from a fixed-width file  
+- Transform the data  
+- Load the transformed data into a new CSV file  
+
+You will then create an **Apache Airflow DAG** to call the shell script and automate the ETL process.
 
 ---
 
-## ⚙️ DAG Tasks Overview
+## 📦 Dataset
 
-The pipeline is implemented in a DAG named **`ETL_toll_data`**, and it runs **daily**.
+The dataset used in this project can be downloaded using the `wget` command:
 
-### 1. `unzip_data`
-Unzips a compressed `.tar.gz` file containing raw toll data files.
+```
+wget https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DB0250EN-SkillsNetwork/labs/Final%20Assignment/tolldata.tgz
+```
 
-### 2. `extract_data_from_csv`
-Extracts the following fields from `vehicle-data.csv`:
+> 💡 Make sure to download the dataset to your Airflow DAGs folder (e.g. `/home/airflow/dags`) and use `sudo` if required.
+
+---
+
+## 🗺 Directions
+
+### 🔹 Task 1.1 - Define DAG Arguments
+
+Define the DAG arguments as follows:
+
+| Parameter         | Value                   |
+|------------------|-------------------------|
+| `owner`          | *any dummy name*        |
+| `start_date`     | today                   |
+| `email`          | *any dummy email*       |
+| `email_on_failure` | True                 |
+| `email_on_retry` | True                    |
+| `retries`        | 1                       |
+| `retry_delay`    | 5 minutes               |
+
+---
+
+### 🔹 Task 1.2 - Define the DAG
+
+| Parameter     | Value                      |
+|---------------|----------------------------|
+| `dag_id`      | ETL_toll_data              |
+| `schedule`    | Daily once                 |
+| `default_args`| As defined above           |
+| `description` | Apache Airflow Project     |
+
+---
+
+### 🔹 Task 1.3 - Create Shell Script: `Extract_Transform_data.sh`
+
+- Unzip the `tolldata.tgz` archive using `tar`
+- Read the `fileformats.txt` file to understand column structure
+
+---
+
+### 🔹 Task 1.4 - Extract Data from CSV
+
+Extract the following fields from `vehicle-data.csv`:
 - Rowid  
 - Timestamp  
 - Anonymized Vehicle Number  
 - Vehicle Type  
 
-Saves result to `csv_data.csv`.
-
-### 3. `extract_data_from_tsv`
-Extracts the following fields from `tollplaza-data.tsv`:
-- Number of Axles  
-- Toll Plaza ID  
-- Toll Plaza Code  
-
-Saves result to `tsv_data.csv`.
-
-### 4. `extract_data_from_fixed_width`
-Extracts the following fields from `payment-data.txt`:
-- Type of Payment Code  
-- Vehicle Code  
-
-Saves result to `fixed_width_data.csv`.
-
-### 5. `consolidate_data`
-Combines all extracted data files (`csv_data.csv`, `tsv_data.csv`, `fixed_width_data.csv`) into a single file called `extracted_data.csv`.  
-Used `paste` command to merge files column-wise.
-
-### 6. `transform_data`
-Converts the `vehicle_type` field in `extracted_data.csv` to **uppercase** using `tr`, and saves the output to `transformed_data.csv`.
+Save output to `csv_data.csv`
 
 ---
 
-## 🧱 DAG Structure
+### 🔹 Task 1.5 - Extract Data from TSV
 
-The tasks follow a linear dependency chain:
+Extract the following fields from `tollplaza-data.tsv`:
+- Number of Axles  
+- Tollplaza ID  
+- Tollplaza Code  
 
+Save output to `tsv_data.csv`
+
+---
+
+### 🔹 Task 1.6 - Extract Data from Fixed-width File
+
+Extract the following fields from `payment-data.txt`:
+- Type of Payment Code  
+- Vehicle Code  
+
+Save output to `fixed_width_data.csv`
+
+---
+
+### 🔹 Task 1.7 - Consolidate Extracted Data
+
+Merge the extracted files into one:
 ```
-unzip_data
-   ↓
-extract_data_from_csv
-   ↓
-extract_data_from_tsv
-   ↓
-extract_data_from_fixed_width
-   ↓
-consolidate_data
-   ↓
-transform_data
+paste csv_data.csv tsv_data.csv fixed_width_data.csv > extracted_data.csv
 ```
+
+Fields order in `extracted_data.csv`:
+1. Rowid  
+2. Timestamp  
+3. Anonymized Vehicle Number  
+4. Vehicle Type  
+5. Number of Axles  
+6. Tollplaza ID  
+7. Tollplaza Code  
+8. Type of Payment Code  
+9. Vehicle Code
+
+---
+
+### 🔹 Task 1.8 - Transform the Data
+
+Transform the `vehicle_type` column in `extracted_data.csv` into **uppercase** and save the result to `staging/transformed_data.csv` using:
+```
+tr '[a-z]' '[A-Z]'
+```
+
+---
+
+### 🔹 Task 1.9 - Create the DAG
+
+- Create a Python DAG file: `ETL_toll_data.py`  
+- Use `BashOperator` to call `Extract_Transform_data.sh` from your DAG  
+- Define a task named `extract_transform_load` that links to the script  
+- Set up the task pipeline accordingly
 
 ---
 
@@ -95,19 +145,29 @@ transform_data
 
 ```
 .
-├── ETL_toll_data.py           # Main Airflow DAG file
-├── data/                      # Raw input files (csv, tsv, fixed-width)
-└── output/                    # Extracted and transformed CSVs
+├── dags/
+│   ├── ETL_toll_data.py              # Airflow DAG
+│   ├── Extract_Transform_data.sh     # Shell script with ETL logic
+│   ├── tolldata.tgz                  # Raw data archive (downloaded)
+│   └── staging/
+│       └── transformed_data.csv      # Final output
 ```
 
 ---
 
 ## ✅ Outcome
 
-By building this ETL pipeline, I demonstrated how to:
-- Automate data ingestion and transformation across inconsistent formats  
-- Use BashOperator in Apache Airflow to execute shell-based processing  
-- Design a clear, modular, and maintainable DAG
+This project demonstrates how to:
+
+- Create a reusable Bash-based ETL pipeline
+- Automate the workflow using Apache Airflow
+- Process multiple data formats into a single structured dataset
+
+---
+
+## 🚀 Reach/Follow Me
+
+- [LinkedIn]([(https://www.linkedin.com/in/hasmikmargaryan/)])
 
 ---
 
