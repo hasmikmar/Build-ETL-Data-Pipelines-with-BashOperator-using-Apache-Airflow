@@ -114,4 +114,4 @@ By building this ETL pipeline, I demonstrated how to:
 ## 👩‍💻 Author
 
 **Hasmik Margaryan**  
-*Data Engineer | Data Science *
+*Data Engineer | Data Science*
